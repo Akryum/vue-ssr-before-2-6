@@ -11,15 +11,28 @@ export default context => {
     router.push(context.url)
 
     router.onReady(() => {
-      context.rendered = () => {
-        // After all preFetch hooks are resolved, our store is now
-        // filled with the state needed to render the app.
+      const matchedComponents = router.getMatchedComponents()
+
+      if (!matchedComponents.length) {
+        return reject(new Error(404))
+      }
+
+      // call `prefetchData()` on all matched route components
+      Promise.all(matchedComponents.map(Component => {
+        if (Component.prefetchData) {
+          return Component.prefetchData({
+            store,
+            route: router.currentRoute
+          })
+        }
+      })).then(() => {
         // When we attach the state to the context, and the `template` option
         // is used for the renderer, the state will automatically be
         // serialized and injected into the HTML as `window.__INITIAL_STATE__`.
         context.state = store.state
-      }
-      resolve(app)
+
+        resolve(app)
+      })
     }, reject)
   })
 }

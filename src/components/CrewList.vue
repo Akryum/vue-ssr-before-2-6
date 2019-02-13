@@ -10,14 +10,7 @@
         :key="member.id"
         class="member"
       >
-        <router-link
-          :to="{
-            name: 'crew-details',
-            params: { id: member.id }
-          }"
-        >
-          {{ member.firstname }} {{ member.lastname }}
-        </router-link>
+        {{ member.firstname }} {{ member.lastname }}
       </div>
     </div>
   </div>
@@ -41,8 +34,9 @@ export default {
   },
 
   // Server only
-  async serverPrefetch () {
-    await this.loadCrew()
+  async prefetchData ({ store }) {
+    const list = await getCrewList()
+    store.commit('setCrew', list)
   },
 
   // Client only
@@ -68,7 +62,4 @@ export default {
 <style lang="stylus" scoped>
 .member
   margin-bottom 42px
-  a
-    text-decoration none
-    color inherit
 </style>
